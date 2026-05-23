@@ -1,0 +1,63 @@
+@startuml
+title Diagrama de Sequência — Gerar Ordem de Serviço / Monitoramento Operacional
+
+hide footbox
+skinparam nodesep 55
+skinparam ranksep 90
+
+actor "Sistema de Monitoramento" as Monitoramento
+control "SistemaMicromobilidade" as Sistema
+entity "v:Veículo" as Veiculo
+entity "reporte:ReporteDefeito" as Reporte
+entity "os:OrdemServico" as OrdemServico
+actor "Equipe Operacional" as Equipe
+
+Monitoramento -> Sistema : monitorarFrota()
+Sistema -> Veiculo : consultarBateriaEPosição()
+Veiculo --> Sistema : bateria, posição, últimaAtualização
+
+alt bateria abaixo de 10%
+  Sistema -> Veiculo : marcarBateriaCrítica()
+  Veiculo --> Sistema : estado = BATERIA_CRITICA
+
+  create OrdemServico
+  Sistema -> OrdemServico : criar(tipo = RECOLHIMENTO,\nmotivo = BATERIA_CRITICA)
+
+  Sistema --> Equipe : notificar ordem de recolhimento
+
+else defeito reportado
+  Sistema -> Reporte : consultarReportePendente(v)
+  Reporte --> Sistema : defeito reportado
+
+  Sistema -> Veiculo : marcarManutenção()
+  Veiculo --> Sistema : estado = MANUTENCAO
+
+  create OrdemServico
+  Sistema -> OrdemServico : criar(tipo = MANUTENCAO,\nmotivo = DEFEITO_REPORTADO)
+
+  Sistema --> Equipe : notificar ordem de manutenção
+
+else veículo parado há mais de 24h
+  Sistema -> Veiculo : verificarTempoParado()
+  Veiculo --> Sistema : paradoHáMaisDe24h = true
+
+  create OrdemServico
+  Sistema -> OrdemServico : criar(tipo = RECOLHIMENTO,\nmotivo = VEICULO_PARADO)
+
+  Sistema --> Equipe : notificar ordem de recolhimento
+end
+
+Equipe -> Sistema : visualizarOrdensDeServiço()
+Sistema --> Equipe : listar ordens abertas
+
+Equipe -> Sistema : assumirOrdem(os)
+Sistema -> OrdemServico : marcarEmAndamento()
+
+Equipe -> Sistema : recolherOuTratarVeículo(v)
+Sistema -> Veiculo : atualizarEstado(RECOLHIDO ou MANUTENCAO)
+
+Equipe -> Sistema : concluirOrdem(os)
+Sistema -> OrdemServico : concluir()
+Sistema --> Equipe : confirmar conclusão
+
+@enduml
