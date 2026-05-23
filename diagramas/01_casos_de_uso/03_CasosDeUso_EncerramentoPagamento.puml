@@ -1,0 +1,42 @@
+@startuml
+title Diagrama de Casos de Uso — Encerramento, Tarifação e Pagamento
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam nodesep 55
+skinparam ranksep 90
+
+actor "Usuário" as Usuario
+actor "Gateway de Pagamento" as Gateway
+actor "Serviço GPS/Mapa" as GPS
+
+rectangle "Encerramento, Tarifação e Pagamento" {
+  usecase "Finalizar viagem\ne pagar" as UC_Finalizar
+  usecase "Validar local de\nestacionamento" as UC_ValidarLocal
+  usecase "Calcular valor\nda corrida" as UC_Calcular
+  usecase "Processar pagamento" as UC_Processar
+  usecase "Registrar histórico\nda viagem" as UC_Historico
+}
+
+Usuario --> UC_Finalizar
+Gateway --> UC_Processar
+GPS --> UC_ValidarLocal
+
+UC_Finalizar .> UC_ValidarLocal : <<include>>
+UC_Finalizar .> UC_Calcular : <<include>>
+UC_Finalizar .> UC_Processar : <<include>>
+UC_Finalizar .> UC_Historico : <<include>>
+
+note right of UC_Calcular
+  O cálculo aplica, quando houver:
+  - desconto por pacote
+  - desconto acadêmico
+  - créditos disponíveis
+end note
+
+note bottom of UC_Finalizar
+  Quando a devolução ocorre em estação
+  de alta demanda, o sistema gera crédito
+  promocional para a próxima viagem.
+end note
+@enduml

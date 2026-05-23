@@ -1,0 +1,40 @@
+@startuml
+title Diagrama de Casos de Uso — Monitoramento Operacional
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam nodesep 55
+skinparam ranksep 90
+
+actor "Equipe Operacional" as Equipe
+actor "Administrador" as Administrador
+actor "Usuário" as Usuario
+actor "Sistema de Monitoramento" as Monitoramento
+actor "Serviço GPS/Mapa" as GPS
+
+rectangle "Monitoramento Operacional" {
+  usecase "Monitorar frota\ne manutenção" as UC_Monitorar
+  usecase "Visualizar veículos\nno mapa operacional" as UC_Mapa
+  usecase "Detectar bateria\ncrítica" as UC_Bateria
+  usecase "Detectar veículo\nparado há mais de 24h" as UC_Parado
+  usecase "Reportar defeito" as UC_Reportar
+  usecase "Gerar alerta\noperacional" as UC_Alerta
+}
+
+Equipe --> UC_Monitorar
+Administrador --> UC_Monitorar
+GPS --> UC_Mapa
+Monitoramento --> UC_Bateria
+Monitoramento --> UC_Parado
+Usuario --> UC_Reportar
+
+UC_Bateria .> UC_Alerta : <<include>>
+UC_Parado .> UC_Alerta : <<include>>
+UC_Reportar .> UC_Alerta : <<include>>
+
+note right of UC_Monitorar
+  O monitoramento operacional
+  utiliza a visualização no mapa
+  e acompanha alertas gerados.
+end note
+@enduml

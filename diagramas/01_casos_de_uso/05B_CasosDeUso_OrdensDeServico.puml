@@ -1,0 +1,34 @@
+@startuml
+title Diagrama de Casos de Uso — Ordens de Serviço e Manutenção
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam nodesep 55
+skinparam ranksep 90
+
+actor "Equipe Operacional" as Equipe
+actor "Administrador" as Administrador
+actor "Sistema de Monitoramento" as Monitoramento
+
+rectangle "Ordens de Serviço e Manutenção" {
+  usecase "Gerar ordem\nde serviço" as UC_GerarOS
+  usecase "Visualizar ordens\nde serviço" as UC_VisualizarOS
+  usecase "Recolher veículo" as UC_Recolher
+  usecase "Registrar manutenção" as UC_Manutencao
+  usecase "Liberar veículo\npara uso" as UC_Liberar
+}
+
+Monitoramento --> UC_GerarOS
+Administrador --> UC_VisualizarOS
+
+Equipe --> UC_VisualizarOS
+Equipe --> UC_Recolher
+Equipe --> UC_Manutencao
+Equipe --> UC_Liberar
+
+note bottom of UC_Liberar
+  Recolher, registrar manutenção e liberar
+  atualizam automaticamente o estado do
+  veículo (detalhado no diagrama de estados).
+end note
+@enduml

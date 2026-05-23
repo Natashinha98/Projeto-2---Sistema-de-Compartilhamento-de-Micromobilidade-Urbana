@@ -1,0 +1,59 @@
+@startuml
+title Diagrama de Atividades — Finalizar Viagem e Pagar
+
+skinparam nodesep 55
+skinparam ranksep 90
+
+start
+
+:Usuário solicita finalização da viagem;
+
+repeat
+  :Obter localização atual do veículo (GPS);
+  :Validar área de estacionamento;
+
+  if (Veículo fora de área permitida?) then (sim)
+    :Informar que o veículo deve ser\nestacionado em área permitida;
+  endif
+
+repeat while (Veículo fora de área permitida?) is (sim)
+
+:Calcular valor base\n(taxa de desbloqueio + tempo x valor/min)\nconforme tipo de veículo e município;
+
+:Aplicar desconto do pacote do usuário;
+
+note right
+  Bronze: sem desconto
+  Prata: 50% na taxa de desbloqueio
+  Ouro: mais vantajoso entre 100% na taxa
+  de desbloqueio ou 50% no valor dos minutos
+end note
+
+if (Possui vínculo acadêmico aprovado?) then (sim)
+  :Aplicar 20% de desconto\nsobre os minutos rodados;
+endif
+
+if (Possui créditos disponíveis?) then (sim)
+  :Aplicar créditos sobre a cobrança;
+endif
+
+:Enviar cobrança ao Gateway de Pagamento;
+
+if (Pagamento aprovado?) then (sim)
+  :Finalizar viagem e registrar histórico;
+
+  if (Devolução em estação de alta demanda?) then (sim)
+    :Adicionar créditos promocionais\npara a próxima viagem;
+  endif
+
+  :Atualizar estado do veículo\ne exibir recibo da viagem;
+  stop
+
+else (não)
+  :Manter cobrança como pendente;
+  :Registrar viagem com pagamento pendente;
+  :Informar falha no pagamento;
+  stop
+endif
+
+@enduml

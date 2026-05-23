@@ -1,0 +1,43 @@
+@startuml
+title Diagrama de Sequência — Reservar Veículo (UC-02)
+
+hide footbox
+skinparam nodesep 55
+skinparam ranksep 90
+
+actor "Usuário" as Usuario
+boundary "App" as App
+control "SistemaMicromobilidade" as Sistema
+entity "v:Veículo" as Veiculo
+entity "r:Reserva" as Reserva
+
+Usuario -> App : selecionarVeículo(v)
+Usuario -> App : solicitarReserva()
+
+App -> Sistema : reservarVeículo(usuario, v)
+Sistema -> Veiculo : consultarEstado()
+Veiculo --> Sistema : estado
+
+alt veículo disponível
+  Sistema -> Veiculo : reservar()
+  Veiculo --> Sistema : estado = RESERVADO
+
+  create Reserva
+  Sistema -> Reserva : criar(usuario, v, prazo = 5 min)
+
+  Sistema --> App : reserva confirmada
+  App --> Usuario : exibir reserva válida por 5 minutos
+
+else veículo indisponível
+  Sistema --> App : reserva não realizada
+  App --> Usuario : informar indisponibilidade
+end
+
+note right of Reserva
+  Se a reserva não for convertida
+  em viagem em até 5 minutos,
+  ela expira e o veículo retorna
+  ao estado DISPONÍVEL.
+end note
+
+@enduml

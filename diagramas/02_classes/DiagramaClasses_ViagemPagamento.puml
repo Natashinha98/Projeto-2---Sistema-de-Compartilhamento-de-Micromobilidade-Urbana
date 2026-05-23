@@ -1,0 +1,101 @@
+@startuml
+title Diagrama de Classes — Viagem e Pagamento
+
+skinparam nodesep 55
+skinparam ranksep 90
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+class Reserva {
+  - id : int
+  - dataHoraInicio : DateTime
+  - dataHoraExpiracao : DateTime
+  - status : StatusReserva
+  + expirou() : boolean
+  + cancelar() : void
+  + converterEmViagem() : Viagem
+}
+class Viagem {
+  - id : int
+  - dataHoraInicio : DateTime
+  - dataHoraFim : DateTime
+  - valorBase : double
+  - valorFinal : double
+  - status : StatusViagem
+  + calcularDuracao() : int
+  + calcularValor(t : Tarifa, p : Pacote) : double
+  + registrarPosicao(p : Localizacao) : void
+  + finalizar() : void
+  + marcarPagamentoPendente() : void
+}
+class RegistroGPS {
+  - dataHora : DateTime
+}
+class Pagamento {
+  - id : int
+  - valor : double
+  - dataHora : DateTime
+  - status : StatusPagamento
+  + processar() : void
+  + confirmar() : void
+  + recusar() : void
+}
+abstract class FormaPagamento {
+  - id : int
+  - descricao : String
+}
+class CartaoCredito {
+  - bandeira : String
+  - validade : String
+}
+class CarteiraDigital {
+  - provedor : String
+}
+interface GatewayPagamento {
+  + processarPagamento(valor : double, forma : FormaPagamento) : StatusPagamento
+}
+class Tarifa {
+  - id : int
+  - tipoVeiculo : TipoVeiculo
+  - taxaDesbloqueio : double
+  - valorPorMinuto : double
+  - ativa : boolean
+}
+
+enum StatusReserva {
+  ATIVA
+  CONVERTIDA
+  EXPIRADA
+  CANCELADA
+}
+enum StatusViagem {
+  EM_ANDAMENTO
+  PENDENTE_PAGAMENTO
+  FINALIZADA
+}
+enum StatusPagamento {
+  PENDENTE
+  APROVADO
+  RECUSADO
+}
+
+Viagem "1" --> "0..1" Reserva : origina-se de
+Viagem "1" *-- "*" RegistroGPS : trajeto
+Viagem "1" --> "1" Pagamento : gera
+Viagem ..> Tarifa : usa
+Pagamento "*" --> "1" FormaPagamento : usa
+FormaPagamento <|-- CartaoCredito
+FormaPagamento <|-- CarteiraDigital
+Pagamento ..> GatewayPagamento : processa via
+
+legend left
+  Relacoes com outros domínios (ver Visão Geral):
+  Reserva e Viagem --> Veiculo
+  RegistroGPS --> Localizacao
+  Tarifa --> Municipio (vigora em)
+  Usuario --> Reserva, Viagem, FormaPagamento
+  Viagem ..> Pacote (aplica desconto)
+end legend
+
+@enduml
